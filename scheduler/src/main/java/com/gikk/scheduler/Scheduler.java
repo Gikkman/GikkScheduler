@@ -34,8 +34,56 @@ public class Scheduler {
 	//***********************************************************************************************
 	//											PUBLIC
 	//***********************************************************************************************
+	/**Gets the {@link ScheduledThreadPoolExecutor}'s thread pool size. See {@link ScheduledThreadPoolExecutor#getPoolSize()}
+	 * 
+	 * @return The ScheduledThreadPoolExecutor's thread pool size
+	 */
+	public long getCapacity(){
+		return executor.getCorePoolSize();
+	}
+	
+	/**Gets the approximate number of scheduled tasks. The number is approximate, since the number might
+	 * change during computation.<br> 
+	 * The number is computed by fetching the queue from {@link ScheduledThreadPoolExecutor} and retrieving its size
+	 * 
+	 * @return The approximate number of scheduled tasks.
+	 */
+	public long getScheduledQueueSize(){
+		return executor.getQueue().size();
+	}
+	
+	/**Gets the approximate number of completed tasks. The number is approximate, since the number might
+	 * change during computation.<br>
+	 * See {@link ScheduledThreadPoolExecutor#getCompletedTaskCount()}
+	 * 
+	 * @return The approximate number of completed tasks
+	 */
+	public long getCompletedTaskCount(){
+		return executor.getCompletedTaskCount();
+	}
+	
+	/**Check the status of the Scheduler. If it has been disposed, no more {@code Tasks} will be executed. To dispose
+	 * of the Scheduler, call {@link #onProgramExit() onProgramExit}.
+	 * 
+	 * @return {@code True} if the Scheduler has been disposed (or is in the process of disposing).
+	 */
+	public boolean isDisposed(){
+		return disposed;
+	}
+	
+	/**Returns the approximate number of threads that are actively executing tasks.
+	 * 
+	 * @return The approximate number of tasks executing at the moment
+	 */
+	public long getActiveCount() {
+		return executor.getActiveCount();
+	}
+	
 	/**Schedules a Task to be executed once every {@code periodMillis}. The Task's {@code onUpdate()} will be called
-	 * the first time after initDelayMillis.
+	 * the first time after initDelayMillis. If any execution of the task encounters an exception, subsequent executions 
+	 * are suppressed. Otherwise, the task will only terminate via cancellation or termination of the executor. <br>
+	 * If any execution of this task takes longer than its period, then subsequent executions may start late, but will not 
+	 * concurrently execute
 	 * 
 	 * @param initDelayMillis How many milliseconds we wait until we start trying to execute this task
 	 * @param periodMillis How many milliseconds we wait until we start trying to execute this task from the previous time it executed
@@ -104,13 +152,14 @@ public class Scheduler {
 					
 					executor.shutdown(); 
 					if( executor.awaitTermination(60, TimeUnit.SECONDS) ) {
+						System.out.println("\tShutdown completed");
 						return;
 					}
-				
-					System.out.println();
+
 					System.out.println("\tThere are still " + executor.getActiveCount() + " tasks executing.\n"
 									 + "\tForcing shutdown...");
 					executor.shutdownNow();
+					System.out.println("\tForce shutdown successful");
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
