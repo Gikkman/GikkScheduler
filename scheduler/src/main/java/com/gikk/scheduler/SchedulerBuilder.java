@@ -63,7 +63,9 @@ public class SchedulerBuilder {
 		return this;
 	}
 	
-	/**Builds a {@link Scheduler} with the parameters that have been assigned in this Builder's setter methods.
+	/**Builds a {@link Scheduler} with the parameters that have been assigned in this Builder's setter methods.<br>
+	 * Parameters can be assigned by using the various setter methods on this builder object <b>before</b> {@code .build()}
+	 * is called. Subsequent calls to setters will not affect an already created {@link Scheduler}.
 	 * 
 	 * @return A Scheduler, using the assigned parameters.
 	 */

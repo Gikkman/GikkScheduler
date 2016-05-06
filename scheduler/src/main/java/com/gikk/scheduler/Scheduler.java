@@ -9,7 +9,9 @@ import java.util.concurrent.TimeUnit;
  * 
  * This class uses a ScheduledThreadPoolExecutor to execute the different tasks. That has the consequence that a thread
  * might be running for a while after the program tells the Scheduler to terminate. <b>This is normal and may take up to 60 seconds.</b>
- * After 60 seconds the Scheduler force-terminates all remaining tasks.
+ * After 60 seconds the Scheduler force-terminates all remaining tasks.<br><br>
+ * 
+ * Schedulers are created via the {@link SchedulerBuilder#build()} method.
  * 
  * @author Gikkman
  *
@@ -18,6 +20,7 @@ public class Scheduler {
 	//***********************************************************************************************
 	//											VARIABLES
 	//***********************************************************************************************
+	private final Thread shutdownThread;
 	private final ScheduledThreadPoolExecutor executor;
 	private boolean disposed = false;
 
@@ -25,6 +28,7 @@ public class Scheduler {
 	//											CONSTRUCTOR
 	//***********************************************************************************************
 	Scheduler (SchedulerBuilder builder) { 	
+		this.shutdownThread = createShutdownThread();
 		ThreadFactory threadFactory = new GikkThreadFactory.Builder()
 													 	   .setThreadsPrefix( builder.threadsPrefix )
 													 	   .setThreadsDaemon( builder.daemonThreads )
@@ -91,8 +95,8 @@ public class Scheduler {
 	 * @return A {@code ScheduledFuture}, which may be used to interact with the scheduled task (say for canceling or interruption)
 	 */
 	ScheduledFuture<?> scheduleRepeatedTask(int initDelayMillis, int periodMillis, final GikkTask task) {	
-		Runnable runnable = wrapRunnable(task);
-		return executor.scheduleAtFixedRate( runnable , initDelayMillis, periodMillis, TimeUnit.MILLISECONDS);
+		Runnable runnable = wrapTask(task);
+		return executor.scheduleAtFixedRate(runnable, initDelayMillis, periodMillis, TimeUnit.MILLISECONDS);
 	}
 
 	/**Postpones a OneTimeTask for delayMillis. After the assigned delay, the task will be performed as soon as possible. 
@@ -105,7 +109,7 @@ public class Scheduler {
 	 * @return A {@code ScheduledFuture}, which may be used to interact with the scheduled task (say for canceling or interruption)
 	 */
 	ScheduledFuture<?> scheduleDelayedTask(int delayMillis, GikkTask task) {
-		Runnable runnable = wrapRunnable(task);
+		Runnable runnable = wrapTask(task);
 		return executor.schedule( runnable , delayMillis, TimeUnit.MILLISECONDS);
 	}
 	
@@ -116,7 +120,7 @@ public class Scheduler {
 	 * @return A {@code ScheduledFuture}, which may be used to interact with the scheduled task (say for canceling or interruption)
 	 */
 	ScheduledFuture<?> executeTask(GikkTask task){
-		Runnable runnable = wrapRunnable(task);
+		Runnable runnable = wrapTask(task);
 		return executor.schedule( runnable , 0, TimeUnit.MILLISECONDS);
 	}
 	//***********************************************************************************************
@@ -140,7 +144,22 @@ public class Scheduler {
 				return;	
 			disposed = true;
 		}
-		
+		shutdownThread.start();
+	}
+	
+	//***********************************************************************************************
+	//											PRIVATE
+	//***********************************************************************************************
+	private Runnable wrapTask(final GikkTask task) {
+		return new Runnable() {		
+			@Override
+			public void run() {
+				task.onExecute();
+			}
+		};
+	}
+	
+	private Thread createShutdownThread(){
 		Thread thread = new Thread( new Runnable() {
 			@Override
 			public void run(){
@@ -166,18 +185,6 @@ public class Scheduler {
 		} } );	
 		
 		thread.setDaemon( false );
-		thread.start();
-	}
-	
-	//***********************************************************************************************
-	//											PRIVATE
-	//***********************************************************************************************
-	private Runnable wrapRunnable(final GikkTask task) {
-		return new Runnable() {		
-			@Override
-			public void run() {
-				task.onExecute();
-			}
-		};
+		return thread;
 	}
 }
