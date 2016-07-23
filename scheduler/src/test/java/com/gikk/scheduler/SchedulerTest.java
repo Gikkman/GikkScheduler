@@ -133,7 +133,7 @@ public class SchedulerTest {
 		
 		Thread.sleep(24 * 60 * 60 * 1000);
 		
-		scheduler.onProgramExit();
+		scheduler.terminate();
 	}
 	
 	class LongTask implements GikkTask {

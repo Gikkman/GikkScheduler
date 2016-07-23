@@ -138,7 +138,7 @@ public class Scheduler {
 	 * might never finish. Thus, it is important that created tasks can be halted.
 	 * 
 	 */
-	public void onProgramExit() {	
+	public void terminate() {	
 		synchronized(this){
 			if( disposed == true )
 				return;	
