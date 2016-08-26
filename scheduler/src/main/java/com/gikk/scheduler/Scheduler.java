@@ -94,7 +94,7 @@ public class Scheduler {
 	 * @param task The task to the executed repeatedly
 	 * @return A {@code ScheduledFuture}, which may be used to interact with the scheduled task (say for canceling or interruption)
 	 */
-	ScheduledFuture<?> scheduleRepeatedTask(int initDelayMillis, int periodMillis, final GikkTask task) {	
+	public ScheduledFuture<?> scheduleRepeatedTask(int initDelayMillis, int periodMillis, final GikkTask task) {	
 		Runnable runnable = wrapTask(task);
 		return executor.scheduleAtFixedRate(runnable, initDelayMillis, periodMillis, TimeUnit.MILLISECONDS);
 	}
@@ -108,7 +108,7 @@ public class Scheduler {
 	 * @param task The task to be executed
 	 * @return A {@code ScheduledFuture}, which may be used to interact with the scheduled task (say for canceling or interruption)
 	 */
-	ScheduledFuture<?> scheduleDelayedTask(int delayMillis, GikkTask task) {
+	public ScheduledFuture<?> scheduleDelayedTask(int delayMillis, GikkTask task) {
 		Runnable runnable = wrapTask(task);
 		return executor.schedule( runnable , delayMillis, TimeUnit.MILLISECONDS);
 	}
@@ -119,7 +119,7 @@ public class Scheduler {
 	 * @param task The task that should be performed
 	 * @return A {@code ScheduledFuture}, which may be used to interact with the scheduled task (say for canceling or interruption)
 	 */
-	ScheduledFuture<?> executeTask(GikkTask task){
+	public ScheduledFuture<?> executeTask(GikkTask task){
 		Runnable runnable = wrapTask(task);
 		return executor.schedule( runnable , 0, TimeUnit.MILLISECONDS);
 	}
