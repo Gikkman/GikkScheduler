@@ -1,20 +1,18 @@
 package com.gikk.scheduler;
 
-import java.util.Arrays;
-import java.util.List;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-@RunWith(Parameterized.class)
-public class SchedulerTest {
-	
-	@Parameterized.Parameters
-	public static List<Object[]> data(){
-		return Arrays.asList( new Object[1][0] );
-	}
-	
+//import java.util.Arrays;
+//import java.util.List;
+//import org.junit.runner.RunWith;
+//import org.junit.runners.Parameterized;
+//
+//@RunWith(Parameterized.class)
+//public class SchedulerTest {
+//	
+//	@Parameterized.Parameters
+//	public static List<Object[]> data(){
+//		return Arrays.asList( new Object[1][0] );
+//	}
+//	
 //	@Test
 //	public void testScheduler1() throws InterruptedException{
 //		Thread.currentThread().setPriority( Thread.MAX_PRIORITY );
@@ -116,39 +114,39 @@ public class SchedulerTest {
 //		
 //		Thread.sleep(100);
 //	}
-	
-	@Test
-	public void testScheduler4() throws InterruptedException{
-		GikkTask task = new GikkTask() {
-			private final long created = System.currentTimeMillis();
-			
-			@Override
-			public void onExecute() {
-				long delta = (System.currentTimeMillis() - created)/1000;
-				System.out.println("Time: " + delta/(60*60) + "h " + (delta/60)%60 +"m " + delta%(60) + "s" );
-			}
-		};
-		Scheduler scheduler = new SchedulerBuilder(1).build();
-		scheduler.scheduleRepeatedTask(1000, 1000, task);
-		
-		Thread.sleep(24 * 60 * 60 * 1000);
-		
-		scheduler.terminate();
-	}
-	
-	class LongTask implements GikkTask {
-		public long a;
-		@Override
-		public void onExecute() {
-			for( long i = 0; i < 10000000; i++){
-				a = i;
-			}
-			System.out.println("*LONG RUN*");
-		}	
-	}
-	
-	class ShortTask implements GikkTask {
-		@Override
-		public void onExecute() { }	
-	}
-}
+//	
+//	@Test
+//	public void testScheduler4() throws InterruptedException{
+//		Runnable task = new Runnable() {
+//			private final long created = System.currentTimeMillis();
+//			
+//			@Override
+//			public void run() {
+//				long delta = (System.currentTimeMillis() - created)/1000;
+//				System.out.println("Time: " + delta/(60*60) + "h " + (delta/60)%60 +"m " + delta%(60) + "s" );
+//			}
+//		};
+//		Scheduler scheduler = new SchedulerBuilder(1).build();
+//		scheduler.scheduleRepeatedTask(1000, 1000, task);
+//		
+//		Thread.sleep(24 * 60 * 60 * 1000);
+//		
+//		scheduler.terminate();
+//	}
+//	
+//	class LongTask implements Runnable {
+//		public long a;
+//		@Override
+//		public void run() {
+//			for( long i = 0; i < 10000000; i++){
+//				a = i;
+//			}
+//			System.out.println("*LONG RUN*");
+//		}	
+//	}
+//	
+//	class ShortTask implements Runnable {
+//		@Override
+//		public void run() { }	
+//	}
+//}
