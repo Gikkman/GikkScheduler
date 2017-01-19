@@ -1,6 +1,7 @@
 package com.gikk.scheduler;
 
-import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
@@ -92,36 +93,58 @@ public class Scheduler {
 	 * @param initDelayMillis How many milliseconds we wait until we start trying to execute this task
 	 * @param periodMillis How many milliseconds we wait until we start trying to execute this task from the previous time it executed
 	 * @param task The task to the executed repeatedly
-	 * @return A {@code ScheduledFuture}, which may be used to interact with the scheduled task (say for canceling or interruption)
+	 * @return A {@link ScheduledFuture}, which may be used to interact with the scheduled task (say for canceling or interruption)
 	 */
-	public ScheduledFuture<?> scheduleRepeatedTask(int initDelayMillis, int periodMillis, final GikkTask task) {	
-		Runnable runnable = wrapTask(task);
-		return executor.scheduleAtFixedRate(runnable, initDelayMillis, periodMillis, TimeUnit.MILLISECONDS);
+	public Future<?> scheduleRepeatedTask(int initDelayMillis, int periodMillis, final Runnable task) {
+        return executor.scheduleAtFixedRate(task, initDelayMillis, periodMillis, TimeUnit.MILLISECONDS);
 	}
 
 	/**Postpones a OneTimeTask for delayMillis. After the assigned delay, the task will be performed as soon as possible. 
-	 * The task might have to wait for longer, if no threads are availible after the stated delay.<br>
+	 * The task might have to wait for longer, if no threads are available after the stated delay.<br>
 	 * The task will be executed only once, and then removed from the scheduler. Results from the task may be recovered from
-	 * the {@code ScheduledFuture} object after completion.
+	 * the {@link ScheduledFuture} object after completion.
 	 * 
 	 * @param delayMillis How many milliseconds we wait until we start trying to execute this task
 	 * @param task The task to be executed
-	 * @return A {@code ScheduledFuture}, which may be used to interact with the scheduled task (say for canceling or interruption)
+	 * @return A {@link ScheduledFuture}, which may be used to interact with the scheduled task (say for canceling or interruption)
 	 */
-	public ScheduledFuture<?> scheduleDelayedTask(int delayMillis, GikkTask task) {
-		Runnable runnable = wrapTask(task);
-		return executor.schedule( runnable , delayMillis, TimeUnit.MILLISECONDS);
+	public Future<?> scheduleDelayedTask(int delayMillis, Runnable task) {
+		return executor.schedule( task , delayMillis, TimeUnit.MILLISECONDS);
+	}
+    
+    /**Postpones a OneTimeTask for delayMillis. After the assigned delay, the task will be performed as soon as possible. 
+	 * The task might have to wait for longer, if no threads are available after the stated delay.<br>
+	 * The task will be executed only once, and then removed from the scheduler. Results from the task may be recovered from
+	 * the {@link ScheduledFuture} object after completion.
+	 * 
+     * @param <T> Return type of the argument {@link Callable}
+	 * @param delayMillis How many milliseconds we wait until we start trying to execute this task
+	 * @param task The task to be executed
+	 * @return A {@link ScheduledFuture}, which may be used to interact with the scheduled task (say for canceling or interruption)
+	 */
+	public <T> Future<T> scheduleDelayedTask(int delayMillis, Callable<T> task) {
+		return executor.schedule( task , delayMillis, TimeUnit.MILLISECONDS);
 	}
 	
 	/**Tells the scheduler to perform a  certain task as soon as possible. This might be immediately (if there are threads
-	 * availible) or sometime in the future. There are no guarantees for when the task will be performed, just as soon as possible.
+	 * available) or sometime in the future. There are no guarantees for when the task will be performed, just as soon as possible.
 	 * 
 	 * @param task The task that should be performed
-	 * @return A {@code ScheduledFuture}, which may be used to interact with the scheduled task (say for canceling or interruption)
+	 * @return A {@link ScheduledFuture}, which may be used to interact with the scheduled task (say for canceling or interruption)
 	 */
-	public ScheduledFuture<?> executeTask(GikkTask task){
-		Runnable runnable = wrapTask(task);
-		return executor.schedule( runnable , 0, TimeUnit.MILLISECONDS);
+	public Future<?> executeTask(Runnable task){
+		return executor.schedule( task , 0, TimeUnit.MILLISECONDS);
+	}
+    
+    /**Tells the scheduler to perform a  certain task as soon as possible. This might be immediately (if there are threads
+	 * available) or sometime in the future. There are no guarantees for when the task will be performed, just as soon as possible.
+     * 
+     * @param <T> Return type of the argument {@link Callable}
+     * @param task The task that should be performed
+     * @return A {@link ScheduledFuture}, which may be used to interact with the scheduled task (say for canceling or interruption)
+     */
+	public <T> Future<T> executeTask(Callable<T> task){
+		return executor.schedule( task , 0, TimeUnit.MILLISECONDS);
 	}
 	//***********************************************************************************************
 	//											TERMINATION
@@ -149,16 +172,7 @@ public class Scheduler {
 	
 	//***********************************************************************************************
 	//											PRIVATE
-	//***********************************************************************************************
-	private Runnable wrapTask(final GikkTask task) {
-		return new Runnable() {		
-			@Override
-			public void run() {
-				task.onExecute();
-			}
-		};
-	}
-	
+	//***********************************************************************************************	
 	private Thread createShutdownThread(){
 		Thread thread = new Thread( new Runnable() {
 			@Override
