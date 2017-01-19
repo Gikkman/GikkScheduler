@@ -68,7 +68,7 @@ public class Scheduler {
 	}
 	
 	/**Check the status of the Scheduler. If it has been disposed, no more {@code Tasks} will be executed. To dispose
-	 * of the Scheduler, call {@link #onProgramExit() onProgramExit}.
+	 * of the Scheduler, call {@link #terminate() terminate}.
 	 * 
 	 * @return {@code True} if the Scheduler has been disposed (or is in the process of disposing).
 	 */
@@ -93,7 +93,7 @@ public class Scheduler {
 	 * @param initDelayMillis How many milliseconds we wait until we start trying to execute this task
 	 * @param periodMillis How many milliseconds we wait until we start trying to execute this task from the previous time it executed
 	 * @param task The task to the executed repeatedly
-	 * @return A {@link ScheduledFuture}, which may be used to interact with the scheduled task (say for canceling or interruption)
+	 * @return A {@link Future}, which may be used to interact with the scheduled task (say for canceling or interruption)
 	 */
 	public Future<?> scheduleRepeatedTask(int initDelayMillis, int periodMillis, final Runnable task) {
         return executor.scheduleAtFixedRate(task, initDelayMillis, periodMillis, TimeUnit.MILLISECONDS);
@@ -102,11 +102,11 @@ public class Scheduler {
 	/**Postpones a OneTimeTask for delayMillis. After the assigned delay, the task will be performed as soon as possible. 
 	 * The task might have to wait for longer, if no threads are available after the stated delay.<br>
 	 * The task will be executed only once, and then removed from the scheduler. Results from the task may be recovered from
-	 * the {@link ScheduledFuture} object after completion.
+	 * the {@link Future} object after completion.
 	 * 
 	 * @param delayMillis How many milliseconds we wait until we start trying to execute this task
 	 * @param task The task to be executed
-	 * @return A {@link ScheduledFuture}, which may be used to interact with the scheduled task (say for canceling or interruption)
+	 * @return A {@link Future}, which may be used to interact with the scheduled task (say for canceling or interruption)
 	 */
 	public Future<?> scheduleDelayedTask(int delayMillis, Runnable task) {
 		return executor.schedule( task , delayMillis, TimeUnit.MILLISECONDS);
@@ -115,12 +115,12 @@ public class Scheduler {
     /**Postpones a OneTimeTask for delayMillis. After the assigned delay, the task will be performed as soon as possible. 
 	 * The task might have to wait for longer, if no threads are available after the stated delay.<br>
 	 * The task will be executed only once, and then removed from the scheduler. Results from the task may be recovered from
-	 * the {@link ScheduledFuture} object after completion.
+	 * the {@link Future} object after completion.
 	 * 
      * @param <T> Return type of the argument {@link Callable}
 	 * @param delayMillis How many milliseconds we wait until we start trying to execute this task
 	 * @param task The task to be executed
-	 * @return A {@link ScheduledFuture}, which may be used to interact with the scheduled task (say for canceling or interruption)
+	 * @return A {@link Future}, which may be used to interact with the scheduled task (say for canceling or interruption)
 	 */
 	public <T> Future<T> scheduleDelayedTask(int delayMillis, Callable<T> task) {
 		return executor.schedule( task , delayMillis, TimeUnit.MILLISECONDS);
@@ -130,7 +130,7 @@ public class Scheduler {
 	 * available) or sometime in the future. There are no guarantees for when the task will be performed, just as soon as possible.
 	 * 
 	 * @param task The task that should be performed
-	 * @return A {@link ScheduledFuture}, which may be used to interact with the scheduled task (say for canceling or interruption)
+	 * @return A {@link Future}, which may be used to interact with the scheduled task (say for canceling or interruption)
 	 */
 	public Future<?> executeTask(Runnable task){
 		return executor.schedule( task , 0, TimeUnit.MILLISECONDS);
@@ -141,7 +141,7 @@ public class Scheduler {
      * 
      * @param <T> Return type of the argument {@link Callable}
      * @param task The task that should be performed
-     * @return A {@link ScheduledFuture}, which may be used to interact with the scheduled task (say for canceling or interruption)
+     * @return A {@link Future}, which may be used to interact with the scheduled task (say for canceling or interruption)
      */
 	public <T> Future<T> executeTask(Callable<T> task){
 		return executor.schedule( task , 0, TimeUnit.MILLISECONDS);
